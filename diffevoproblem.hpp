@@ -62,7 +62,8 @@ public:
     }
 
     vector<double> solve() {
-        default_random_engine gen;
+        default_random_engine rdEng;
+        random_device rd;
         uniform_real_distribution<double> xDist(
                 m_dimRanges.at(0).at(0),
                 m_dimRanges.at(0).at(1));
@@ -71,13 +72,13 @@ public:
                 m_dimRanges.at(1).at(1));
         uniform_real_distribution<double> zeroOne(
                 0.0, 1.0);
-        uniform_int_distribution<int> agentIdxDist(0, m_nPop);
-        uniform_int_distribution<int> randomDim(0, 2);
+        uniform_int_distribution<int> agentIdxDist(0, m_nPop-1);
+        uniform_int_distribution<int> randomDim(0, 2-1);
         vector<vector<double> > agents(m_nPop);
         int nDim = 2;
         for (auto &agent : agents) {
-            agent.push_back(xDist(gen));
-            agent.push_back(yDist(gen));
+            agent.push_back(xDist(rdEng));
+            agent.push_back(yDist(rdEng));
         }
         cout << "Agent initialization: " << endl;
         vector<double> fitness(m_nPop);
@@ -100,14 +101,14 @@ public:
             cout << "Generation " << gen << endl;
             for (int idx = 0; idx < agents.size(); idx++) {
                 int r1, r2, r3;
-                r1 = agentIdxDist(gen);
-                while ((r2 = agentIdxDist(gen)) == r1);
+                r1 = agentIdxDist(rdEng);
+                while ((r2 = agentIdxDist(rdEng)) == r1);
                 do {
-                    r3 = agentIdxDist(gen);
+                    r3 = agentIdxDist(rdEng);
                 } while (r3 == r2 || r3 == r1);
-                int changeDim = randomDim(gen);
+                int changeDim = randomDim(rdEng);
                 for (int d = 0; d < 2; d++) {
-                    if (zeroOne(gen) < CR || d == changeDim) {
+                    if (zeroOne(rdEng) < CR || d == changeDim) {
                         proposedAgents.at(idx).at(d) = 
                             agents.at(r1).at(d) + F * \
                             (agents.at(r2).at(d) - agents.at(r3).at(d));
